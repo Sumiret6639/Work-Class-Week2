@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- <button @click="isCircle = !isCircle, showTxt()">Change</button> -->
+        <button @click="isCircle = !isCircle, isCircle ? text = '變圓' : text ='變方' ">Change</button>
+        {{text}}
+        <div class="box" :class="{circle : isCircle}"></div>
+        <hr>
+        <label for="a-btn">
+            <input type="checkbox" v-model="arrayClass" name="" id="a-btn" value="txt-red">
+            字變成紅色
+        </label>
+        <label for="b-btn">
+            <input type="checkbox" v-model="arrayClass" name="" id="b-btn" value="bgc-yellow">
+            背景變成黃色
+        </label>
+        <div class="box" :class="[...arrayClass]">Hello</div>
+    </div>
+    <script>
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                isCircle: true,
+                text: "變圓",
+                arrayClass: [],
+            },
+
+            methods: {
+                // showTxt(){
+                //     const vm = this
+                //     if(vm.isCircle){
+                //         vm.text= "變圓"
+                //     }else{
+                //         vm.text = "變方"
+                //     }
+                // }
+            },
+        })
+    </script>
+    <style>
+
+        *{
+            font-size: 48px;
+            line-height: 1.5;
+        }
+
+        button{
+            width: 200px;
+            margin-bottom: 32px;
+            cursor: pointer;
+            background-color: #000;
+            color: #fff
+        }
+
+        label{
+            display: flex;
+            align-items: center;
+        }
+
+        input[type=checkbox]{
+            appearance: none;
+            -moz-appearance: none;
+            width: 60px;
+            height: 60px;
+            border: 1px solid #000;
+        }
+
+        input[type=checkbox]:checked{
+            border: 1px solid #fff;
+            background-color: #000;
+        }
+
+        .box {
+            width: 200px;
+            height: 200px;
+            background-color: blue;
+        }
+    
+        .circle {
+            border-radius: 100%;
+        }
+
+        .txt-red{
+            color: red;
+        }
+
+        .bgc-yellow{
+            background-color: yellow;
+        }
+    </style>
+</body>
+</html>

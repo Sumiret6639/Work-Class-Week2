@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="#">Keeper</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#">Link</a>
+                        </li>
+                        <li class="nav-item cart">
+                            <button type="button" class="" data-toggle="modal" data-target="#exampleModal">
+                                Sopping Cart
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <section class="main">
+            <div class="banner pt-5 mb-5">
+                <div class="container">
+                    <h1 class="mb-5">Today Special</h1>
+                </div>                
+            </div>
+            <div class="container d-flex flex-column">
+                <ul class="row align-items-center mb-5">
+                    <li class="col-12 col-md-6 col-lg-4 mb-5 custom" v-for="(product) in products" :key="product.id">
+                        <div class="card-body">
+                            <div style="height: 200px; 
+                                background-size: cover; background-position: center" :style="bgcss(product.imageUrl)">
+                            </div>
+                            <hr class="my-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <h4 class="mb-3">{{product.title}}</h4>
+                                <div class="w-100 d-flex justify-content-around mb-2">
+                                    <div>{{product.price}} 元</div>
+                                    <div class="category p-1">
+                                        {{product.category}}
+                                    </div>
+                                </div>                                
+                                <div class="text-center mb-4">{{product.content}} </div>
+                                <div class="d-flex">
+                                    <button class="btn-outline">More Detail</button>
+                                    <button @click="addCart(product.id,2)">Add Cart</button>                                    
+                                </div>                                
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div> 
+
+            <!-- 購物車 -->
+            <div class="modal fade " id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog position-fixed modal-custom">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">購物車預覽</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <ul>
+                                <li v-for="(item, key) in carts" :key="item.product.id" class="d-flex justify-content-between align-items-center mb-2">
+                                    <div style="width: 100px; height: 50px; 
+                                        background-size: cover; background-position: center" :style="bgcss(item.product.imageUrl)">
+                                    </div>
+                                    {{item.product.title}}
+                                    {{item.quantity}}
+                                    <a class="del" @click.prevent="delCart(item.product.id)">x</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-outline">Checkout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                products: [],
+                carts: [],
+                cartProduct: {},
+            },
+
+            methods: {
+                getProducts(){
+                    const vm = this;
+                    axios.get('https://course-ec-api.hexschool.io/api/41faceff-2adc-42b0-b8f8-7e6da6e96823/ec/products')
+                        .then(function (res) {
+                            console.log(res);
+                            vm.products = res.data.data
+                        })
+                        .catch(function (err) {
+                            // handle err
+                            console.log(err);
+                        })
+                },
+
+                addCart(item,num){
+                    const vm = this;
+                    const cart = {
+                        product: item,
+                        quantity: num,
+                    }
+                    console.log(cart)
+                    axios.post('https://course-ec-api.hexschool.io/api/41faceff-2adc-42b0-b8f8-7e6da6e96823/ec/shopping',cart)
+                        .then(function (res) {
+                            console.log(res);
+                            // vm.products = res.data.data
+                        })
+                        .catch(function (err) {
+                            // handle err
+                            console.log(err);
+                        })
+                },
+
+                getCarts(){
+                    const vm = this;
+                    axios.get('https://course-ec-api.hexschool.io/api/41faceff-2adc-42b0-b8f8-7e6da6e96823/ec/shopping')
+                        .then(function (res) {
+                            console.log(res);
+                            
+                            vm.carts = res.data.data
+                        })
+                        .catch(function (err) {
+                            // handle err
+                            console.log(err);
+                    })
+                    
+                },
+
+                delCart(id){
+                    console.log(id)
+                    const vm = this;
+                    axios.delete(`https://course-ec-api.hexschool.io/api/41faceff-2adc-42b0-b8f8-7e6da6e96823/ec/shopping/${id}`,id)
+                        .then(function (res) {
+                            console.log(res);
+                            vm.getCarts()
+                        })
+                        .catch(function (err) {
+                            // handle err
+                            console.log(err.message);
+                        })
+                },
+
+                bgcss(img) {
+                    return {
+                        'background-image': `url(${img})`
+                    }
+                }
+            },
+
+            created() {
+                const vm = this;
+                vm.getProducts();
+                vm.getCarts();
+            },
+        })
+    </script>
+
+    <style>
+        ul,li{
+            list-style: none;
+            padding: 0;
+        }
+
+        a{
+            display: block;
+            padding: 16px;
+            cursor: pointer;
+        }
+
+        button{
+            appearance: none;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            background-color: #000;
+            color: #fff;
+            border: 0;
+            padding: 8px 16px;         
+        }
+
+        h1{
+            width: 30%;
+            line-height: 84px;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .banner{
+            width: 100%;
+            height: 400px;
+            background-image: url(https://images.unsplash.com/photo-1520179307921-eb8ee73f131c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-body{
+            background-color: #eee;
+            border-radius: 5px;
+        }
+
+        .category{
+            background-color:#bbb;
+        }
+
+        .modal-custom{
+            width: 30%;
+            margin: 0;
+            right: 0;
+        }
+
+        .modal-content{
+            height: 100vh;
+            border-radius: 0;
+            padding: 32px;
+        }
+
+        .btn-outline{
+            border: 1px solid #000;
+            background: transparent;
+            color: #000;
+        }
+    
+    </style>
+</body>
+</html>
